@@ -5,6 +5,7 @@ qrcode==7.4.2
 requests>=2.28.2
 chardet>=5.1.0
 Pillow
+streamlit>=1.40.1
 pre-commit
 cozepy>=0.9.2
 python-dotenv>=0.19
@@ -39,3 +40,4 @@ dingtalk_stream
 zhipuai>=2.0.1
 # tongyi qwen new sdk
 dashscope
+streamlit>=1.40.1
