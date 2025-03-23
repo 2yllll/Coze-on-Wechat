@@ -45,7 +45,7 @@ class PyttsVoice(Voice):
                 self.engine.runAndWait()
             else:
                 # In ubuntu, runAndWait do not really wait until the file created.
-                # It will return once the task queue is empty, but the task is still running in coroutine.
+                # It will return once the worker queue is empty, but the worker is still running in coroutine.
                 # And if you call runAndWait() and time.sleep() twice, it will stuck, so do not use this.
                 # If you want to fix this, add self._proxy.setBusy(True) in line 127 in espeak.py, at the beginning of the function save_to_file.
                 # self.engine.runAndWait()

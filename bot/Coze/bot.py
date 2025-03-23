@@ -5,9 +5,13 @@ from common.log import logger
 from config import conf
 from cozepy import Coze, TokenAuth, MessageContentType, MessageType
 import json
+import ast
+
+from .workflows import Workflow
 from .user_session import UserSessionManager
 from .conversation_manager import ConversationManager
 from pathlib import Path
+import re
 
 
 class CozeBot(Bot):
@@ -28,6 +32,7 @@ class CozeBot(Bot):
             coze_client=self.coze_client,
             session_manager=self.session_manager
         )
+        self.workflows = Workflow(self.coze_client)
 
     def reply(self, query, context: Context = None) -> Reply:
         try:
@@ -46,7 +51,7 @@ class CozeBot(Bot):
 
             # 创建消息并获取回复
             return self._create_message_and_get_reply(conversation_id, query, context)
-            
+
         except Exception as e:
             logger.error(f"处理消息异常: {str(e)}", exc_info=True)
             return Reply(ReplyType.TEXT, "消息处理失败")
@@ -59,18 +64,18 @@ class CozeBot(Bot):
                 file_path = Path(context.content).resolve()
                 if not file_path.exists():
                     raise FileNotFoundError(f"图片文件不存在: {file_path}")
-                
+
                 file = self.coze_client.files.upload(file=str(file_path))
                 return json.dumps([{"type": "file", "file_id": file.id}]), None
-                
+
             except Exception as e:
                 logger.error(f"图片处理失败: {str(e)}")
                 return None, Reply(ReplyType.TEXT, "图片上传失败")
-            
-        #分享链接处理
+
+        # 分享链接处理
         if context.type == ContextType.SHARING:
             return json.dumps([{"type": "text", "text": context.content}]), None
-        
+
         # 处理清除记忆指令
         if context.type == ContextType.TEXT and "清除记忆" in context.content:
             user_id = context["receiver"]
@@ -79,8 +84,36 @@ class CozeBot(Bot):
             new_id = self.conv_manager.create_conversation(user_id)
             return None, Reply(ReplyType.TEXT, "记忆已清除") if new_id else (
                 None, Reply(ReplyType.TEXT, "清除失败"))
-        
-        # 基础文本处理
+
+        if context.type == ContextType.TEXT and "关闭机器人" in context.content:
+            user_id = context["receiver"]
+            if not user_id:
+                return None, Reply(ReplyType.TEXT, "用户ID获取失败")
+            new_id = self.conv_manager.create_conversation(user_id)
+            return None, Reply(ReplyType.TEXT, "记忆已清除") if new_id else (
+                None, Reply(ReplyType.TEXT, "清除失败"))
+
+        # 调用workflow
+        try:
+            test = re.findall(r"{([^{}:]*)}", context.content)
+            if len(test):
+                matches = test
+                task_config = None
+            else:
+                json_content = re.sub(r'(\w+):', r'"\1":', context.content)
+                workflow_config = json.loads(json_content)
+                matches = list(workflow_config.keys())
+                task_config = list(workflow_config.values())[0]
+
+            if context.type == ContextType.TEXT and len(matches) > 0:
+                if not task_config:
+                    return None, self.workflows.apply(matches[0], context)
+                elif task_config:
+                    return None, self.workflows.timer_trigger(matches[0], context, **task_config)
+        except:
+            # 基础文本处理
+            return json.dumps([{"type": "text", "text": context.content}]), None
+
         return json.dumps([{"type": "text", "text": context.content}]), None
 
     def _create_message_and_get_reply(self, conversation_id, query, context):
@@ -125,7 +158,7 @@ class CozeBot(Bot):
                             url = info_dict.get('linkUrl')
                             image = info_dict.get('thumbUrl')
                             desc = info_dict.get('desc')
-                        
+
                             # 当只有图片字段时，使用ReplyType.IMAGE回复
                             if 'image' in info_dict:
                                 image_url = info_dict.get("image")
@@ -155,7 +188,7 @@ class CozeBot(Bot):
                 return replies[0] if len(replies) == 1 else replies
             logger.error("未找到有效回复内容")
             return Reply(ReplyType.TEXT, "未能获取到回复")
-            
+
         except Exception as e:
             logger.error(f"消息处理失败: {str(e)}")
             return Reply(ReplyType.TEXT, "请求处理超时")

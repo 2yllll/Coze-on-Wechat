@@ -17,6 +17,7 @@ dashscope
 ffmpeg
 ffmpeg-python
 pilk
+web.py
 tiktoken>=0.3.2 # openai calculate token
 #voice
 pydub>=0.25.1 # need ffmpeg
@@ -40,4 +41,7 @@ dingtalk_stream
 zhipuai>=2.0.1
 # tongyi qwen new sdk
 dashscope
-streamlit>=1.40.1
+promise>=2.3.0
+#schedule
+APScheduler
+asyncIO

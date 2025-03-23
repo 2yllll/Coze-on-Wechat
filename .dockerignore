@@ -1,0 +1,11 @@
+.git
+.gitignore
+*.md
+dist
+.turbo
+dist.zip
+config.json
+sessions.db
+sessions.db-shm
+sessions.db-wal
+user_datas.pkl

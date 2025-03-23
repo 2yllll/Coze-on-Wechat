@@ -23,7 +23,8 @@ available_setting = {
     "open_ai_api_base": "https://api.openai.com/v1",
     "proxy": "",  # openai使用的代理
     # chatgpt模型， 当use_azure_chatgpt为true时，其名称为Azure上model deployment名称
-    "model": "gpt-3.5-turbo",  # 可选择: gpt-4o, pt-4o-mini, gpt-4-turbo, claude-3-sonnet, wenxin, moonshot, qwen-turbo, xunfei, glm-4, minimax, gemini等模型，全部可选模型详见common/const.py文件
+    "model": "gpt-3.5-turbo",
+    # 可选择: gpt-4o, pt-4o-mini, gpt-4-turbo, claude-3-sonnet, wenxin, moonshot, qwen-turbo, xunfei, glm-4, minimax, gemini等模型，全部可选模型详见common/const.py文件
     "bot_type": "",  # 可选配置，使用兼容openai格式的三方服务时候，需填"chatGPT"。bot具体名称详见common/const.py文件列出的bot_type，如不填根据model名称判断，
     "use_azure_chatgpt": False,  # 是否使用azure的chatgpt
     "azure_deployment_id": "",  # azure 模型部署名称
@@ -47,12 +48,12 @@ available_setting = {
     "trigger_by_self": False,  # 是否允许机器人触发
     "text_to_image": "dall-e-2",  # 图片生成模型，可选 dall-e-2, dall-e-3
     # Azure OpenAI dall-e-3 配置
-    "dalle3_image_style": "vivid", # 图片生成dalle3的风格，可选有 vivid, natural
-    "dalle3_image_quality": "hd", # 图片生成dalle3的质量，可选有 standard, hd
+    "dalle3_image_style": "vivid",  # 图片生成dalle3的风格，可选有 vivid, natural
+    "dalle3_image_quality": "hd",  # 图片生成dalle3的质量，可选有 standard, hd
     # Azure OpenAI DALL-E API 配置, 当use_azure_chatgpt为true时,用于将文字回复的资源和Dall-E的资源分开.
-    "azure_openai_dalle_api_base": "", # [可选] azure openai 用于回复图片的资源 endpoint，默认使用 open_ai_api_base
-    "azure_openai_dalle_api_key": "", # [可选] azure openai 用于回复图片的资源 key，默认使用 open_ai_api_key
-    "azure_openai_dalle_deployment_id":"", # [可选] azure openai 用于回复图片的资源 deployment id，默认使用 text_to_image
+    "azure_openai_dalle_api_base": "",  # [可选] azure openai 用于回复图片的资源 endpoint，默认使用 open_ai_api_base
+    "azure_openai_dalle_api_key": "",  # [可选] azure openai 用于回复图片的资源 key，默认使用 open_ai_api_key
+    "azure_openai_dalle_deployment_id": "",  # [可选] azure openai 用于回复图片的资源 deployment id，默认使用 text_to_image
     "image_proxy": True,  # 是否需要图片代理，国内访问LinkAI时需要
     "image_create_prefix": ["画", "看", "找"],  # 开启图片回复的前缀
     "concurrency_in_session": 1,  # 同一会话最多有多少条消息在处理中，大于1可能乱序
@@ -85,7 +86,8 @@ available_setting = {
     "xunfei_api_key": "",  # 讯飞 API key
     "xunfei_api_secret": "",  # 讯飞 API secret
     "xunfei_domain": "",  # 讯飞模型对应的domain参数，Spark4.0 Ultra为 4.0Ultra，其他模型详见: https://www.xfyun.cn/doc/spark/Web.html
-    "xunfei_spark_url": "",  # 讯飞模型对应的请求地址，Spark4.0 Ultra为 wss://spark-api.xf-yun.com/v4.0/chat，其他模型参考详见: https://www.xfyun.cn/doc/spark/Web.html
+    "xunfei_spark_url": "",
+    # 讯飞模型对应的请求地址，Spark4.0 Ultra为 wss://spark-api.xf-yun.com/v4.0/chat，其他模型参考详见: https://www.xfyun.cn/doc/spark/Web.html
     # claude 配置
     "claude_api_cookie": "",
     "claude_uuid": "",
@@ -106,16 +108,17 @@ available_setting = {
     # dify配置
     "dify_api_base": "https://api.dify.ai/v1",
     "dify_api_key": "app-xxx",
-    "dify_app_type": "chatbot", # dify助手类型 chatbot(对应聊天助手或对话流)/agent(对应Agent)/workflow(对应工作流，则默认为chatbot
-    "dify_conversation_max_messages": 5, # dify目前不支持设置历史消息长度，暂时使用超过最大消息数清空会话的策略，缺点是没有滑动窗口，会突然丢失历史消息，当设置的值小于等于0，则不限制历史消息长度
-    "dify_error_reply": "", # dify bot错误时给用户的回复
+    "dify_app_type": "chatbot",  # dify助手类型 chatbot(对应聊天助手或对话流)/agent(对应Agent)/workflow(对应工作流，则默认为chatbot
+    "dify_conversation_max_messages": 5,
+    # dify目前不支持设置历史消息长度，暂时使用超过最大消息数清空会话的策略，缺点是没有滑动窗口，会突然丢失历史消息，当设置的值小于等于0，则不限制历史消息长度
+    "dify_error_reply": "",  # dify bot错误时给用户的回复
     # coze配置
     "coze_api_base": "https://api.coze.cn",
     "coze_api_key": "xxx",
     "coze_bot_id": "xxx",
     "coze_return_show_img": "false",
-    "coze_space_id": "xxx", # coze空间id
-    "coze_voice_id": "", #coze音色id
+    "coze_space_id": "xxx",  # coze空间id
+    "coze_voice_id": "",  # coze音色id
     # wework的通用配置
     "wework_smart": True,  # 配置wework是否使用已登录的企业微信，False为多开
     # 语音设置
@@ -124,7 +127,8 @@ available_setting = {
     "voice_reply_voice": False,  # 是否使用语音回复语音，需要设置对应语音合成引擎的api key
     "always_reply_voice": False,  # 是否一直使用语音回复
     "voice_to_text": "openai",  # 语音识别引擎，支持openai,baidu,google,azure,xunfei,ali
-    "text_to_voice": "openai",  # 语音合成引擎，支持openai,baidu,google,azure,xunfei,ali,pytts(offline),elevenlabs,edge(online),coze
+    "text_to_voice": "openai",
+    # 语音合成引擎，支持openai,baidu,google,azure,xunfei,ali,pytts(offline),elevenlabs,edge(online),coze
     "text_to_voice_model": "tts-1",
     "tts_voice_id": "alloy",
     # baidu 语音api配置， 使用百度语音识别和语音合成时需要
@@ -137,10 +141,10 @@ available_setting = {
     "azure_voice_api_key": "",
     "azure_voice_region": "japaneast",
     # elevenlabs 语音api配置
-    "xi_api_key": "",    #获取ap的方法可以参考https://docs.elevenlabs.io/api-reference/quick-start/authentication
-    "xi_voice_id": "",   #ElevenLabs提供了9种英式、美式等英语发音id，分别是“Adam/Antoni/Arnold/Bella/Domi/Elli/Josh/Rachel/Sam”
+    "xi_api_key": "",  # 获取ap的方法可以参考https://docs.elevenlabs.io/api-reference/quick-start/authentication
+    "xi_voice_id": "",  # ElevenLabs提供了9种英式、美式等英语发音id，分别是“Adam/Antoni/Arnold/Bella/Domi/Elli/Josh/Rachel/Sam”
     # 图像模型设置
-    "image_recognition": False, # 是否开启图片识别
+    "image_recognition": False,  # 是否开启图片识别
     # 服务时间限制，目前支持itchat
     "chat_time_module": False,  # 是否开启服务时间限制
     "chat_start_time": "00:00",  # 服务开始时间
@@ -175,7 +179,7 @@ available_setting = {
     "feishu_token": "",  # 飞书 verification token
     "feishu_bot_name": "",  # 飞书机器人的名字
     # 钉钉配置
-    "dingtalk_client_id": "",  # 钉钉机器人Client ID 
+    "dingtalk_client_id": "",  # 钉钉机器人Client ID
     "dingtalk_client_secret": "",  # 钉钉机器人Client Secret
     "dingtalk_card_enabled": False,
     ## gewechat配置
@@ -183,8 +187,8 @@ available_setting = {
     "gewechat_download_url": "",
     "gewechat_token": "",
     "gewechat_app_id": "",
-    "gewechat_callback_url": "", # 回调地址，示例：http://172.17.0.1:9919/v2/api/callback/collect
-    
+    "gewechat_callback_url": "",  # 回调地址，示例：http://172.17.0.1:9919/v2/api/callback/collect
+
     # chatgpt指令自定义触发词
     "clear_memory_commands": ["#清除记忆"],  # 重置会话指令，必须以#开头
     # channel配置
@@ -212,6 +216,15 @@ available_setting = {
     "Minimax_group_id": "",
     "Minimax_base_url": "",
     "web_port": 9899,
+    "triggers": {
+        "getInfo": [  # name
+            "oPoAYEaH",  # token
+            "1000000000399881986"  # id
+        ]
+    },
+    "workflows": {
+        "getInfo": "7479786106533429300"  # name:id
+    },
 }
 
 
@@ -242,7 +255,7 @@ class Config(dict):
             return default
         except Exception as e:
             raise e
-            
+
     def set(self, key, value):
         try:
             self[key] = value
@@ -339,6 +352,7 @@ def load_config():
 
     config.load_user_datas()
 
+
 def save_config():
     global config
     config_path = "./config.json"
@@ -392,6 +406,7 @@ def write_plugin_config(pconf: dict):
     global plugin_config
     for k in pconf:
         plugin_config[k.lower()] = pconf[k]
+
 
 def remove_plugin_config(name: str):
     """

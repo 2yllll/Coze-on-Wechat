@@ -1,9 +1,7 @@
 import os
 import time
 from urllib.parse import urlparse
-import socket
-from fastapi import FastAPI, Request, HTTPException
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, Request, HTTPException,WebSocket
 from fastapi.responses import FileResponse, PlainTextResponse
 import uvicorn
 
@@ -20,6 +18,7 @@ from voice.audio_convert import mp3_to_silk
 import uuid
 
 MAX_UTF8_LEN = 2048
+
 
 @singleton
 class GeWeChatChannel(ChatChannel):
@@ -56,7 +55,8 @@ class GeWeChatChannel(ChatChannel):
         if not self.download_url:
             logger.warning("[gewechat] download_url is not set, unable to download image")
 
-        logger.info(f"[gewechat] init: base_url: {self.base_url}, token: {self.token}, app_id: {self.app_id}, download_url: {self.download_url}")
+        logger.info(
+            f"[gewechat] init: base_url: {self.base_url}, token: {self.token}, app_id: {self.app_id}, download_url: {self.download_url}")
 
         # 添加FastAPI应用实例
         self.fastapi_app = FastAPI()
@@ -102,14 +102,13 @@ class GeWeChatChannel(ChatChannel):
         port = parsed_url.port
         logger.info(f"[gewechat] 启动FastAPI服务器: {callback_url}, 使用端口 {port}")
 
-
         # 注册路由
         @self.fastapi_app.get(parsed_url.path)
-        async def handle_get(request: Request):
+        async def handle_get(request:Request):
             return await Query().GET(request)
-            
+
         @self.fastapi_app.post(parsed_url.path)
-        async def handle_post(request: Request):
+        async def handle_post(request:Request):
             return await Query().POST(request)
 
         # 启动服务器
@@ -120,13 +119,13 @@ class GeWeChatChannel(ChatChannel):
             log_config=None
         )
         self.server = uvicorn.Server(config)
-        
+
         # 将服务器启动移到新线程
         import threading
         server_thread = threading.Thread(target=self.server.run, daemon=True)
         server_thread.start()
-        
-        #设置gewechat_callback_url
+
+        # 设置gewechat_callback_url
         time.sleep(3)
         try:
             data = self.client.set_callback(self.token, callback_url)
@@ -138,6 +137,7 @@ class GeWeChatChannel(ChatChannel):
         except Exception as e:
             logger.error(f"[gewechat] 设置回调地址时发生错误: {str(e)}")
             return
+
     def send(self, reply: Reply, context: Context):
         receiver = context["receiver"]
         gewechat_message = context.get("msg")
@@ -155,10 +155,11 @@ class GeWeChatChannel(ChatChannel):
                     # 如果是mp3文件，转换为silk格式
                     silk_path = os.path.splitext(content)[0] + '.silk'
                     duration = mp3_to_silk(content, silk_path)
-                    voice_duration = min(duration*1000, 60000)
+                    voice_duration = min(duration * 1000, 60000)
                     callback_url = conf().get("gewechat_callback_url")
                     silk_url = callback_url + "?file=" + silk_path
-                    self.client.post_voice(app_id=self.app_id, to_wxid=receiver, voice_url=silk_url, voice_duration=voice_duration)
+                    self.client.post_voice(app_id=self.app_id, to_wxid=receiver, voice_url=silk_url,
+                                           voice_duration=voice_duration)
                     logger.info(f"[gewechat] 发送语音给 {receiver}: {silk_url}, 时长: {voice_duration}秒")
                     return
                 else:
@@ -189,7 +190,7 @@ class GeWeChatChannel(ChatChannel):
             desc = reply.content.get("desc")
             link_url = reply.content.get("link_url")
             thumb_url = reply.content.get("thumb_url")
-        
+
             thumb_url = thumb_url or "https://lf-flow-web-cdn.doubao.com/obj/flow-doubao/doubao/logo-doubao-overflow.png"
             # 执行发送
             self.client.post_link(
@@ -204,43 +205,51 @@ class GeWeChatChannel(ChatChannel):
 
 
 class Query:
-    async def GET(self, request: Request):
+    async def GET(self, request:Request):
         file_path = request.query_params.get("file", "")
         test = request.query_params.get("test", "")
-        
+
         if test == "1":
             logger.info("[gewechat] 收到连通性测试请求")
             return PlainTextResponse("OK")
-            
+
         if file_path:
             # 保留原有的路径安全检查逻辑
             clean_path = os.path.abspath(file_path)
             tmp_dir = os.path.abspath("tmp")
-            
+
             if not clean_path.startswith(tmp_dir):
-                logger.error(f"[gewechat] Forbidden access to file outside tmp directory: file_path={file_path}, clean_path={clean_path}, tmp_dir={tmp_dir}")
+                logger.error(
+                    f"[gewechat] Forbidden access to file outside tmp directory: file_path={file_path}, clean_path={clean_path}, tmp_dir={tmp_dir}")
                 raise HTTPException(status_code=403)
-                
+
             if os.path.exists(clean_path):
                 return FileResponse(clean_path)
             else:
                 logger.error(f"[gewechat] File not found: {clean_path}")
                 raise HTTPException(status_code=404)
-                
+
         return PlainTextResponse("gewechat callback server is running")
 
-    async def POST(self, request: Request):
+    async def POST(self, request:Request):
         channel = GeWeChatChannel()
+
+        body = await request.body()
+        if not body:
+            logger.error("[gewechat] Empty request body")
+            return PlainTextResponse("Empty request body", status_code=400)
+
+
         data = await request.json()
-        logger.debug("[gewechat] receive data: {}".format(data))
-        
+        self.debug = logger.debug("[gewechat] receive data: {}".format(data))
+
         # gewechat服务发送的回调测试消息
         if isinstance(data, dict) and 'testMsg' in data and 'token' in data:
             logger.debug(f"[gewechat] 收到gewechat服务发送的回调测试消息")
             return "success"
 
         gewechat_msg = GeWeChatMessage(data, channel.client)
-        
+
         # 微信客户端的状态同步消息
         if gewechat_msg.ctype == ContextType.STATUS_SYNC:
             logger.debug(f"[gewechat] ignore status sync message: {gewechat_msg.content}")
@@ -253,20 +262,20 @@ class Query:
 
         # 忽略来自自己的消息
         if gewechat_msg.my_msg:
-            logger.debug(f"[gewechat] ignore message from myself: {gewechat_msg.actual_user_id}: {gewechat_msg.content}")
+            logger.debug(
+                f"[gewechat] ignore message from myself: {gewechat_msg.actual_user_id}: {gewechat_msg.content}")
             return "success"
 
         # 忽略过期的消息
-        if int(gewechat_msg.create_time) < int(time.time()) - 60 * 5: # 跳过5分钟前的历史消息
-            logger.debug(f"[gewechat] ignore expired message from {gewechat_msg.actual_user_id}: {gewechat_msg.content}")
+        if int(gewechat_msg.create_time) < int(time.time()) - 60 * 5:  # 跳过5分钟前的历史消息
+            logger.debug(
+                f"[gewechat] ignore expired message from {gewechat_msg.actual_user_id}: {gewechat_msg.content}")
             return "success"
 
-        context = channel._compose_context(
-            gewechat_msg.ctype,
-            gewechat_msg.content,
-            isgroup=gewechat_msg.is_group,
-            msg=gewechat_msg,
-        )
+        self.context = channel._compose_context(gewechat_msg.ctype, gewechat_msg.content, isgroup=gewechat_msg.is_group,
+                                                msg=gewechat_msg, )
+        context = self.context
         if context:
             channel.produce(context)
         return "success"
+
