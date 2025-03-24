@@ -41,7 +41,9 @@ dingtalk_stream
 zhipuai>=2.0.1
 # tongyi qwen new sdk
 dashscope
+
 promise>=2.3.0
 #schedule
 APScheduler
 asyncIO
+
