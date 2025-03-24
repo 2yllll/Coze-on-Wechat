@@ -18,4 +18,9 @@ config.json             # 本地配置文件
 *user_datas.pkl
 # IDE相关
 .idea/
-.vscode/ 
+.vscode/
+config.json
+sessions.db
+sessions.db-shm
+sessions.db-wal
+user_datas.pkl
